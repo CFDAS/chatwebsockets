@@ -1,3 +1,5 @@
+console.log("--- SERVIDOR VERSÃO 3.0 INICIADO COM SUCESSO ---");
+
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
@@ -10,29 +12,19 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
+// Atividade 2: Armazena os nomes dos usuários ativos.
+// Usamos um Set para garantir que não haja nomes duplicados e pela performance.
+const activeUsers = new Set();
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-/**
- * Função dedicada para registrar mensagens no arquivo chat.log.
- */
 function logMessage(username, message) {
-  const timestamp = new Date().toISOString();
-  // Formatando a data/hora para o padrão brasileiro e removendo os segundos/milissegundos
-  const formattedTimestamp = new Date().toLocaleString('pt-BR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-
+  const formattedTimestamp = new Date().toLocaleString('pt-BR');
   const logEntry = `[${formattedTimestamp}] ${username}: ${message}\n`;
-
   fs.appendFile('chat.log', logEntry, (err) => {
     if (err) {
       console.error('Erro ao gravar no arquivo de log:', err);
@@ -41,23 +33,51 @@ function logMessage(username, message) {
 }
 
 io.on('connection', (socket) => {
-    console.log('um usuário conectou');
+  console.log('Um novo usuário está tentando se conectar...');
 
-    socket.on('disconnect', () => {
-        console.log('usuário desconectou');
-    });
+  // Atividade 2: Lógica para validar e adicionar um novo usuário
+  socket.on('add user', (username) => {
+    const trimmedUsername = username.trim();
 
-    socket.on('chat message', (data) => {
-        // CORREÇÃO FINAL: Usando data.username e data.message
-        if (data && data.username && data.message) {
-          logMessage(data.username, data.message);
-        }
-      
-        // Reenvia a mensagem para todos os clientes
-        io.emit('chat message', data);
-    });
+    // Validação 1: Nome vazio
+    if (!trimmedUsername) {
+      socket.emit('user validation', { success: false, message: 'O nome de usuário não pode ser vazio.' });
+      return;
+    }
+    // Validação 2: Nome já em uso
+    if (activeUsers.has(trimmedUsername)) {
+      socket.emit('user validation', { success: false, message: 'Este nome de usuário já está em uso. Tente outro.' });
+      return;
+    }
+
+    // Se o nome for válido, armazena no socket e na lista de ativos
+    socket.username = trimmedUsername;
+    activeUsers.add(trimmedUsername);
+
+    console.log(`Usuário '${trimmedUsername}' aceito e conectado.`);
+    socket.emit('user validation', { success: true });
+  });
+
+  // Atividade 2: Lógica para tratar mensagens de um usuário já validado
+  socket.on('chat message', (msg) => {
+    // Só processa a mensagem se o usuário estiver validado (tem um 'socket.username')
+    if (socket.username) {
+      logMessage(socket.username, msg);
+      io.emit('chat message', { username: socket.username, message: msg });
+    }
+  });
+
+  // Atividade 2: Lógica para remover o usuário ao desconectar
+  socket.on('disconnect', () => {
+    if (socket.username) {
+      activeUsers.delete(socket.username);
+      console.log(`Usuário '${socket.username}' desconectou.`);
+    } else {
+      console.log('Um usuário não validado desconectou.');
+    }
+  });
 });
 
 server.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
