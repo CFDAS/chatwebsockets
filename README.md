@@ -1,8 +1,8 @@
-//ATIVIDADE 1
+//ATIVIDADES 1 E 2
 
 # Chat em Tempo Real com WebSockets
 
-Este é um projeto simples de um chat em tempo real construído com Node.js, Express e a biblioteca Socket.IO. A aplicação permite que múltiplos usuários se conectem, escolham um nome e troquem mensagens instantaneamente.
+Este é um projeto simples de um chat em tempo real construído com Node.js, Express e a biblioteca Socket.IO. A aplicação permite que múltiplos usuários se conectem e troquem mensagens instantaneamente, com um sistema de validação que garante que cada usuário tenha um nome único e válido.
 
 Uma funcionalidade chave deste projeto é o registro de todas as mensagens em um arquivo de log para persistência e auditoria.
 
@@ -10,7 +10,9 @@ Uma funcionalidade chave deste projeto é o registro de todas as mensagens em um
 
   - **Chat em Tempo Real:** Mensagens enviadas são exibidas instantaneamente para todos os usuários conectados.
   - **Identificação de Usuário:** Cada mensagem é identificada com o nome do usuário que a enviou.
-  - **Registro de Mensagens (Log):** Todas as conversas são salvas no arquivo `chat.log`, incluindo data, hora, usuário e a mensagem.
+  - **Registro de Mensagens (Log):** Todas as conversas são salvas no arquivo `chat.log`.
+  - **Validação de Nome de Usuário:** Impede que usuários entrem com nomes vazios ou que já estejam em uso.
+  - **Controle de Usuários Ativos:** O servidor gerencia dinamicamente a lista de usuários conectados em tempo real.
 
 ## Tecnologias Utilizadas
 
@@ -38,11 +40,10 @@ Siga os passos abaixo para rodar a aplicação localmente:
 2.  **Acesse a pasta do projeto:**
 
     ```bash
-    cd chatwebsocket
+    cd chatwebsockets
     ```
 
 3.  **Instale as dependências:**
-    Este comando irá ler o arquivo `package.json` e instalar todas as bibliotecas necessárias (Express e Socket.IO).
 
     ```bash
     npm install
@@ -57,10 +58,7 @@ Siga os passos abaixo para rodar a aplicação localmente:
     Você verá a mensagem `Servidor rodando na porta 3000` no seu terminal.
 
 5.  **Acesse o chat no navegador:**
-    Abra seu navegador e acesse o seguinte endereço:
-    [http://localhost:3000](http://localhost:3000)
-
-    Para testar a conversa, abra o mesmo endereço em uma segunda aba ou janela do navegador e use um nome de usuário diferente.
+    Abra seu navegador e acesse o seguinte endereço: http://localhost:3000
 
 ## Estrutura de Arquivos
 
